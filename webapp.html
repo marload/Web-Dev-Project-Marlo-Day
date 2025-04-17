@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Guess the Number</title>
+  <title>What Are the Odds?</title>
   <style>
     body {
       font-family:'Courier New', Courier, monospace;
@@ -43,10 +43,11 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      margin: 0.3rem;
     }
 
     button:hover {
-      background-color: #67263d;
+      background-color: #4e1d30;
     }
 
     .result, .history {
@@ -62,45 +63,82 @@
   </style>
 </head>
 <body>
-  <h1>Number Guessing Game</h1>
+  <h1>What Are the Odds?</h1>
   <div class="game-container">
-    <p>Guess a number between 1 and 20</p>
-    <input type="number" id="guessInput" min="1" max="20" />
+    <p>Guess a number between 1 and 5</p>
+    <input type="number" id="guessInput" min="1" max="5" />
     <button onclick="makeGuess()">Guess</button>
+    <button onclick="clearHistory()">Clear History</button>
+    
     <div class="result" id="resultMessage"></div>
     <div class="history" id="historyLog"></div>
+    <div class="result" id="scoreBoard">Correct guesses: 0</div>
+
     <!-- Navigation Buttons -->
-    <div class="nav-buttons">
+    <div class="nav-buttons" style="margin-top: 1rem;">
       <a href="index.html"><button>Go to Resume</button></a>
       <a href="scratch.html"><button>Back to Sourdough</button></a>
     </div>
   </div>
 
+  <!-- 🎉 Confetti script -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- 🎵 Mockingjay tune -->
+  <audio id="mockingjayAudio">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/23/audio_f081be1d52.mp3?filename=mockingjay-whistle-9848.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+  </audio>
+
   <script>
     const history = [];
+    let correctGuesses = 0;
+    const audio = document.getElementById('mockingjayAudio');
 
     function makeGuess() {
       const userGuess = parseInt(document.getElementById('guessInput').value);
-      if (isNaN(userGuess) || userGuess < 1 || userGuess > 20) {
-        document.getElementById('resultMessage').textContent = "Please enter a number between 1 and 20.";
+      const resultMessage = document.getElementById('resultMessage');
+      const historyLog = document.getElementById('historyLog');
+      const scoreBoard = document.getElementById('scoreBoard');
+
+      if (isNaN(userGuess) || userGuess < 1 || userGuess > 5) {
+        resultMessage.textContent = "Please enter a number between 1 and 5.";
         return;
       }
 
-      const randomNumber = Math.floor(Math.random() * 20) + 1;
+      const randomNumber = Math.floor(Math.random() * 5) + 1;
       let result = '';
 
       if (userGuess === randomNumber) {
-        result = "🎉 You guessed it right!";
+        result = "🎉 Good luck!";
+        correctGuesses++;
+        
+        // Play the Mockingjay audio
+        audio.currentTime = 0; // restart if needed
+        audio.play();
+
+        // Launch confetti
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
       } else {
-        result = `❌ Wrong! The correct number was ${randomNumber}.`;
+        result = `❌ Not quite! The correct number was ${randomNumber}.`;
       }
 
-      // Log the guess
       history.unshift(`You guessed ${userGuess}, computer chose ${randomNumber}`);
+      resultMessage.textContent = result;
+      historyLog.innerHTML = `<strong>History:</strong><br>${history.join('<br>')}`;
+      scoreBoard.textContent = `Correct guesses: ${correctGuesses}`;
+    }
 
-      // Update result message and history
-      document.getElementById('resultMessage').textContent = result;
-      document.getElementById('historyLog').innerHTML = `<strong>History:</strong><br>${history.join('<br>')}`;
+    function clearHistory() {
+      history.length = 0;
+      correctGuesses = 0;
+      document.getElementById('resultMessage').textContent = '';
+      document.getElementById('historyLog').innerHTML = '';
+      document.getElementById('scoreBoard').textContent = 'Correct guesses: 0';
     }
   </script>
 </body>
